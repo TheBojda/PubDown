@@ -246,3 +246,13 @@ PubDown also provides:
 # License
 
 MIT
+
+# Sample Book
+
+The sample project included in this repository is based on excerpts from my book **Simulated Reality**.
+
+It is provided solely to demonstrate the recommended PubDown project structure and publishing workflow.
+
+The text, images, and other creative content remain copyrighted and **may not be copied, redistributed, or used to create derivative works**, except as permitted by applicable copyright law.
+
+Only the PubDown source code is licensed under the project's software license.
