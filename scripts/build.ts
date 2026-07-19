@@ -4,6 +4,7 @@ import path from "path";
 import yaml from "js-yaml";
 import fse from "fs-extra";
 import { execa } from "execa";
+import { Command } from "commander";
 
 type BookYaml = {
   frontmatter?: Array<{ file: string }>;
@@ -298,13 +299,62 @@ function buildEpubDedicationPage(meta: MetaYaml, outPath: string) {
   fs.writeFileSync(outPath, lines.join("\n"), "utf8");
 }
 
-function getBookDirFromArgs(): string {
-  const arg = process.argv[2];
-  if (!arg) {
-    console.error("Usage: yarn build <bookDir>");
-    process.exit(1);
+type OutputFormat = "epub" | "pdf" | "all";
+
+type CliOptions = {
+  bookDir: string;
+  distDir: string;
+  format: OutputFormat;
+};
+
+function parseCliArgs(): CliOptions {
+  const program = new Command();
+
+  program
+    .name("pubdown")
+    .description("Generate PDF and EPUB books from Markdown projects.")
+    .version("0.1.0");
+
+  let resolved: CliOptions | undefined;
+
+  program
+    .command("build")
+    .description("Build a Markdown book project")
+    .argument("<bookDir>", "Directory containing book.yaml and meta.yaml")
+    .option("-o, --out <distDir>", "Output directory", "dist")
+    .option(
+      "-f, --format <format>",
+      "Output format: epub, pdf, or all",
+      "all"
+    )
+    .action((bookDirArg: string, options: { out: string; format: string }) => {
+      const format = options.format.toLowerCase();
+
+      if (!(["epub", "pdf", "all"] as string[]).includes(format)) {
+        throw new Error(
+          `Invalid format: ${options.format}. Expected epub, pdf, or all.`
+        );
+      }
+
+      const bookDir = path.resolve(process.cwd(), bookDirArg);
+      const distDir = path.isAbsolute(options.out)
+        ? options.out
+        : path.resolve(process.cwd(), options.out);
+
+      resolved = {
+        bookDir,
+        distDir,
+        format: format as OutputFormat,
+      };
+    });
+
+  program.parse(process.argv);
+
+  if (!resolved) {
+    program.help({ error: true });
   }
-  return path.resolve(process.cwd(), arg);
+
+  return resolved;
 }
 
 function slugifyTitle(s: string): string {
@@ -316,12 +366,11 @@ function slugifyTitle(s: string): string {
 
 async function main() {
   const toolRoot = process.cwd();
-  const bookDir = getBookDirFromArgs();
+  const { bookDir, distDir, format } = parseCliArgs();
 
   const bookPath = path.join(bookDir, "book.yaml");
   const metaPath = path.join(bookDir, "meta.yaml");
 
-  const distDir = path.join(toolRoot, "dist");
   const templatesDir = path.join(toolRoot, "templates");
   const assetsDir = path.join(bookDir, "assets");
 
@@ -337,8 +386,12 @@ async function main() {
   if (!fs.existsSync(metaPath)) throw new Error(`Missing meta.yaml: ${metaPath}`);
   if (!fs.existsSync(assetsDir)) throw new Error(`Missing assets dir: ${assetsDir}`);
   if (!fs.existsSync(coverImage)) throw new Error(`Missing cover image: ${coverImage}`);
-  if (!fs.existsSync(epubCss)) throw new Error(`Missing template css: ${epubCss}`);
-  if (!fs.existsSync(printTemplate)) throw new Error(`Missing print template: ${printTemplate}`);
+  if ((format === "epub" || format === "all") && !fs.existsSync(epubCss)) {
+    throw new Error(`Missing template css: ${epubCss}`);
+  }
+  if ((format === "pdf" || format === "all") && !fs.existsSync(printTemplate)) {
+    throw new Error(`Missing print template: ${printTemplate}`);
+  }
 
   await ensurePandocExists();
   await fse.ensureDir(distDir);
@@ -355,18 +408,21 @@ async function main() {
   buildPandocMetadata(meta, metaOut);
 
   const epubTitlePage = path.join(distDir, "_titlepage.epub.md");
-  buildEpubTitlePage(meta, epubTitlePage);
-
   const epubCopyright = path.join(distDir, "_copyright.epub.md");
-  buildEpubCopyrightPage(meta, epubCopyright);
-
   const epubDedication = path.join(distDir, "_dedication_ebook.epub.md");
-  buildEpubDedicationPage(meta, epubDedication);
-
   const epubMaster = path.join(distDir, "_master.epub.md");
   const pdfMaster = path.join(distDir, "_master.pdf.md");
-  buildCombinedMarkdown(book, bookDir, epubMaster, "epub");
-  buildCombinedMarkdown(book, bookDir, pdfMaster, "pdf");
+
+  if (format === "epub" || format === "all") {
+    buildEpubTitlePage(meta, epubTitlePage);
+    buildEpubCopyrightPage(meta, epubCopyright);
+    buildEpubDedicationPage(meta, epubDedication);
+    buildCombinedMarkdown(book, bookDir, epubMaster, "epub");
+  }
+
+  if (format === "pdf" || format === "all") {
+    buildCombinedMarkdown(book, bookDir, pdfMaster, "pdf");
+  }
 
   const safeTitle = slugifyTitle(meta.title);
   const epubOut = path.join(distDir, `${safeTitle}.epub`);
@@ -374,62 +430,66 @@ async function main() {
 
   const resourcePath = `${bookDir}:${path.join(bookDir, "assets")}`;
 
-  await execa(
-    "pandoc",
-    [
-      "-f",
-      "markdown+smart",
-      metaOut,
-      epubTitlePage,
-      epubCopyright,
-      epubDedication,
-      epubMaster,
+  if (format === "epub" || format === "all") {
+    await execa(
+      "pandoc",
+      [
+        "-f",
+        "markdown+smart",
+        metaOut,
+        epubTitlePage,
+        epubCopyright,
+        epubDedication,
+        epubMaster,
 
-      "--resource-path",
-      resourcePath,
+        "--resource-path",
+        resourcePath,
 
-      "--lua-filter",
-      removeTitleH1Filter,
-      "--lua-filter",
-      italicFilter,
-      "--toc",
-      "--toc-depth=2",
-      "--split-level=2",
-      "--epub-title-page=false",
-      "--css",
-      epubCss,
-      "--epub-cover-image",
-      coverImage,
-      "-o",
-      epubOut,
-    ],
-    { stdio: "inherit" }
-  );
+        "--lua-filter",
+        removeTitleH1Filter,
+        "--lua-filter",
+        italicFilter,
+        "--toc",
+        "--toc-depth=2",
+        "--split-level=2",
+        "--epub-title-page=false",
+        "--css",
+        epubCss,
+        "--epub-cover-image",
+        coverImage,
+        "-o",
+        epubOut,
+      ],
+      { stdio: "inherit" }
+    );
+  }
 
-  await execa(
-    "pandoc",
-    [
-      "-f",
-      "markdown+smart",
-      metaOut,
-      pdfMaster,
+  if (format === "pdf" || format === "all") {
+    await execa(
+      "pandoc",
+      [
+        "-f",
+        "markdown+smart",
+        metaOut,
+        pdfMaster,
 
-      "--resource-path",
-      resourcePath,
+        "--resource-path",
+        resourcePath,
 
-      "--lua-filter",
-      italicFilter,
-      "--lua-filter",
-      dropcapFilter,
-      "--pdf-engine=xelatex",
-      "--top-level-division=chapter",
-      "--template",
-      printTemplate,
-      "-o",
-      pdfOut,
-    ],
-    { stdio: "inherit" }
-  );
+        "--lua-filter",
+        italicFilter,
+        "--lua-filter",
+        dropcapFilter,
+        "--pdf-engine=xelatex",
+        "--top-level-division=chapter",
+        "--template",
+        printTemplate,
+        "-o",
+        pdfOut,
+      ],
+      { stdio: "inherit" }
+    );
+  }
 
   /*
     const texOut = path.join(distDir, "_debug.tex");
@@ -469,8 +529,9 @@ async function main() {
 
   console.log("\n✅ Done:");
   console.log(`Book dir: ${bookDir}`);
-  console.log(`EPUB: ${epubOut}`);
-  console.log(`PDF : ${pdfOut}`);
+  console.log(`Output dir: ${distDir}`);
+  if (format === "epub" || format === "all") console.log(`EPUB: ${epubOut}`);
+  if (format === "pdf" || format === "all") console.log(`PDF : ${pdfOut}`);
 }
 
 main().catch((err) => {

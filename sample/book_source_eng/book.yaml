@@ -1,0 +1,9 @@
+frontmatter:
+  - file: chapter-01.md
+parts:
+  - title: Are We Living in a Simulation?
+    items:
+      - file: chapter-03.md
+      - file: chapter-04.md
+backmatter:
+  - file: chapter-20.md
