@@ -1,0 +1,272 @@
+\documentclass[10pt,twoside]{book}
+
+\usepackage[
+  paperwidth=140mm,
+  paperheight=216mm,
+  inner=18mm,
+  outer=18mm,
+  top=18mm,
+  bottom=20mm,
+  includehead,
+  includefoot
+]{geometry}
+
+% ------------------------------------------------
+% Typography
+% ------------------------------------------------
+\usepackage{microtype}
+\microtypesetup{protrusion=true}
+
+\tolerance=2000
+\emergencystretch=4em
+\hbadness=10000
+
+\usepackage{setspace}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+$if(latex-language)$
+\setmainlanguage{$latex-language$}
+$endif$
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+\setkeys{Gin}{width=\linewidth,keepaspectratio}
+\hypersetup{hidelinks}
+
+\setmainfont{DejaVu Serif}
+\sloppy
+\onehalfspacing
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ------------------------------------------------
+% HEADERS (TRULY centered, uppercase, single-line, ellipsis)
+% ------------------------------------------------
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage[fit]{truncate}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{14pt}
+\setlength{\headsep}{18pt}
+\setlength{\headwidth}{\textwidth}
+
+\renewcommand{\figurename}{Ábra}
+
+% --- SET YOUR BOOK TITLE HERE ---
+\newcommand{\BookTitle}{$title$}
+
+% Store ONLY the chapter title (no "CHAPTER 2")
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+% Make a slightly narrower truncation box, then center THAT box in the full header width.
+% This avoids the "left-stuck" look of truncate's fixed-width box.
+\newcommand{\CenteredTruncatedHeader}[1]{%
+  \makebox[\headwidth][c]{%
+    \truncate{0.86\headwidth}{#1}%
+  }%
+}
+
+% Put header content always into the center field and switch by page parity
+\fancyhead[C]{%
+  \ifodd\value{page}%
+    \CenteredTruncatedHeader{\MakeUppercase{\leftmark}}%
+  \else%
+    \CenteredTruncatedHeader{\MakeUppercase{\BookTitle}}%
+  \fi%
+}
+
+% Page numbers bottom outer
+\fancyfoot[LE,RO]{\thepage}
+
+% No header on chapter opening pages
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[LE,RO]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+\renewcommand{\headrulewidth}{0pt}
+
+% ------------------------------------------------
+% Chapter title styling (stable, no titlesec)
+% ------------------------------------------------
+\makeatletter
+\def\@makechapterhead#1{%
+  \vspace*{15pt}%
+  {\parindent \z@ \centering \LARGE
+    #1\par\nobreak
+    \vspace{35pt}%
+  }%
+}
+\def\@makeschapterhead#1{%
+  \vspace*{15pt}%
+  {\parindent \z@ \centering \LARGE
+    #1\par\nobreak
+    \vspace{35pt}%
+  }%
+}
+\makeatother
+
+% ------------------------------------------------
+% Drop caps
+% ------------------------------------------------
+\usepackage{lettrine}
+\setcounter{DefaultLines}{3}
+\renewcommand{\LettrineFontHook}{\bfseries}
+
+% Paragraph formatting
+\setlength{\parindent}{1.25em}
+\setlength{\parskip}{0pt}
+
+% ------------------------------------------------
+% TOC styling
+% ------------------------------------------------
+\usepackage{titletoc}
+\renewcommand{\contentsname}{$toc-title$}
+
+\titlecontents{part}
+  [0pt]
+  {\addvspace{1.0em}\large}
+  {\thecontentslabel\quad}
+  {}
+  {}
+
+\titlecontents{chapter}
+  [1.5em]
+  {\addvspace{0.2em}}
+  {}
+  {}
+  {\titlerule*[0.7pc]{.}\contentspage}
+
+\titlecontents{section}
+  [3.5em]
+  {}
+  {\contentslabel{2.0em}}
+  {}
+  {\titlerule*[0.7pc]{.}\contentspage}
+
+% ------------------------------------------------
+% Part styling (smaller, elegant, not bold)
+% ------------------------------------------------
+\makeatletter
+\renewcommand{\partname}{}
+
+\def\@part[#1]#2{%
+  \if@twocolumn
+    \onecolumn
+    \@tempswatrue
+  \else
+    \@tempswafalse
+  \fi
+  \ifnum \c@secnumdepth >-2\relax
+    \refstepcounter{part}%
+    \addcontentsline{toc}{part}{\thepart\hspace{1em}#1}%
+  \else
+    \addcontentsline{toc}{part}{#1}%
+  \fi
+  \markboth{}{}%
+  \thispagestyle{plain}%
+  \vspace*{25pt}
+  \begin{center}
+    {\normalfont\Large\mdseries \thepart\par}
+    \vspace{12pt}
+    {\normalfont\LARGE\mdseries #2\par}
+  \end{center}
+  \vspace{35pt}
+  \newpage
+  \if@tempswa \twocolumn \fi
+}
+
+\def\@spart#1{%
+  \if@twocolumn
+    \onecolumn
+    \@tempswatrue
+  \else
+    \@tempswafalse
+  \fi
+  \markboth{}{}%
+  \thispagestyle{plain}%
+  \vspace*{25pt}
+  \begin{center}
+    {\normalfont\LARGE\mdseries #1\par}
+  \end{center}
+  \vspace{35pt}
+  \newpage
+  \if@tempswa \twocolumn \fi
+}
+\makeatother
+
+\begin{document}
+
+% ------------------------------------------------
+% Custom Title Page
+% ------------------------------------------------
+\begin{titlepage}
+\thispagestyle{empty}
+
+\vspace*{0.25\textheight}
+
+\begin{center}
+
+{\Large $author$ \par}
+
+\vspace{25pt}
+
+{\LARGE $title$ \par}
+\vspace{18pt}
+
+$if(subtitle)$
+{\itshape
+$subtitle$
+\par}
+$endif$
+
+\end{center}
+
+\vfill
+
+\end{titlepage}
+
+% ------------------------------------------------
+% Copyright Page
+% ------------------------------------------------
+\clearpage
+\thispagestyle{empty}
+
+\vspace*{0.22\textheight}
+
+\begin{center}
+\itshape
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.9\baselineskip}
+
+$if(copyright-page)$
+$copyright-page$
+$endif$
+
+\end{center}
+
+% ------------------------------------------------
+% Dedication Page (optional)
+% ------------------------------------------------
+$if(dedication)$
+\clearpage
+\thispagestyle{empty}
+
+\vspace*{0.30\textheight}
+
+\begin{center}
+\itshape
+$dedication$
+\end{center}
+
+\clearpage
+$endif$
+
+$body$
+\end{document}

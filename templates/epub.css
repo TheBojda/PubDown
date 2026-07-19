@@ -1,0 +1,214 @@
+/* ===============================
+   RESET (Play Books / EPUB)
+   =============================== */
+body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+}
+
+html, body {
+  hyphens: auto;
+  -epub-hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* ===============================
+   GLOBAL TYPOGRAPHY (kulcs: 75%)
+   =============================== */
+body {
+  font-family: serif;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+
+  font-size: 75%;          /* 👈 globálisan kisebb (a "jó" CSS mintájára) */
+  line-height: 1.55;       /* 1.6 ok, de kicsit kompaktabb Play Booksban */
+
+  margin: 5%;
+}
+
+/* Paragraph */
+p {
+  text-indent: 1.2em;
+  margin: 0 0 0.85em 0;
+  text-decoration: none;
+  widows: 2;
+  orphans: 2;
+
+  /* Play Books sokszor túl sokat tördel: itt kikapcsoljuk a bekezdésekben */
+  hyphens: none;
+  -epub-hyphens: none;
+  -webkit-hyphens: none;
+}
+
+p:first-child {
+  text-indent: 0;
+}
+
+/* Headings: Play Books default túl nagy lehet, ezért kontrolláljuk */
+h1, h2, h3, h4, h5, h6 {
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+
+  line-height: 1.2;
+  text-align: left;
+  text-indent: 0;
+
+  margin-top: 1.4em;
+  margin-bottom: 0.5em;
+
+  hyphens: none;
+  -epub-hyphens: none;
+  -webkit-hyphens: none;
+
+  page-break-after: avoid;
+  page-break-before: avoid;
+}
+
+h1 {
+  font-size: 1.9em;          /* nagyobb, látványos */
+  font-weight: 400;          /* nem túl vastag */
+  line-height: 1.25;
+
+  text-align: center;
+
+  margin-top: 3em;           /* nagy levegő felül */
+  margin-bottom: 2em;        /* nagy tér a szöveg előtt */
+
+  page-break-after: avoid;
+  page-break-before: avoid;
+
+  hyphens: none;
+  -epub-hyphens: none;
+  -webkit-hyphens: none;
+}
+
+h2 {
+  font-size: 1.9em;          /* nagyobb */
+  font-weight: 400;
+  line-height: 1.25;
+
+  text-align: center;
+
+  margin-top: 3em;           /* nagy levegő felül */
+  margin-bottom: 2em;        /* nagy tér a szöveg előtt */
+
+  page-break-after: avoid;
+  page-break-before: avoid;
+
+  hyphens: none;
+  -epub-hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* Inline stílusok */
+.italic { font-style: italic; }
+
+/* ===============================
+   TITLE PAGE (kompakt + középre)
+   =============================== */
+section.titlepage {
+  page-break-after: always;
+  margin-top: 100px;       /* a mintádhoz hasonlóan (stabilabb mint %) */
+}
+
+/* minden belső elem középre */
+section.titlepage,
+section.titlepage * {
+  text-align: center;
+  text-indent: 0;
+  hyphens: auto;
+  -epub-hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+section.titlepage .tp-author {
+  font-size: 1.15em;
+  line-height: 1.5;
+  margin-bottom: 1em;
+}
+
+section.titlepage .tp-title {
+  font-size: 1.45em;
+  line-height: 1.5;
+  font-weight: 600;
+  margin-bottom: 0.6em;
+}
+
+section.titlepage .tp-subtitle {
+  font-size: 1.05em;
+  line-height: 1.5;
+  font-style: italic;
+  margin-top: 20px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+/* Dummy H1 elrejtése (csak a H1, ne a section) */
+h1.tp-hidden {
+  display: none;
+}
+
+/* ===============================
+   COPYRIGHT PAGE (dőlt + középre)
+   =============================== */
+section.copyright-page {
+  text-align: center;
+  font-style: italic;
+  margin-top: 100px;
+  page-break-after: always;
+}
+
+/* Bekezdések között szellősebb tér */
+section.copyright-page p {
+  margin: 0 0 1em 0;
+  text-indent: 0;
+}
+
+/* Play Books / engine öröklési hibák ellen */
+section.copyright-page * {
+  text-align: center;
+  font-style: italic;
+  text-indent: 0;
+}
+
+blockquote {
+  margin: 1em 10%;
+  font-style: italic;
+}
+
+blockquote p { 
+  text-indent: 0; 
+}
+
+nav ol {
+  list-style-type: none;
+}
+
+nav li {
+  list-style-type: none;
+}
+
+/* ===============================
+   EBOOK DEDICATION PAGE
+   =============================== */
+section.ebook-dedication-page {
+  text-align: center;
+  margin-top: 100px;
+  page-break-after: always;
+}
+
+section.ebook-dedication-page p {
+  text-indent: 0;
+  margin: 0 0 1em 0;
+}
+
+section.ebook-dedication-page * {
+  text-align: center;
+  text-indent: 0;
+}
+
+
+
