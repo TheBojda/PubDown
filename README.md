@@ -247,12 +247,14 @@ PubDown also provides:
 
 MIT
 
-# Sample Book
+# Sample Content
 
-The sample project included in this repository is based on excerpts from my book **Simulated Reality**.
+The `sample/` directory contains excerpts from my book **Simulated Reality**.
 
-It is provided solely to demonstrate the recommended PubDown project structure and publishing workflow.
+These files are included exclusively as an example of a PubDown project. All text and images are © László Fazekas and are **not** covered by the software license of this repository. They may not be copied, redistributed, or reused without permission.
 
-The text, images, and other creative content remain copyrighted and **may not be copied, redistributed, or used to create derivative works**, except as permitted by applicable copyright law.
+The good news is that the complete book is available **free of charge** in digital format at:
 
-Only the PubDown source code is licensed under the project's software license.
+👉 **https://simulatedrealitybook.com/**
+
+where you can also find links to the free eBook editions, the printed versions, and additional articles on the topics covered in the book.
