@@ -2,7 +2,7 @@
 
 **PubDown** is a developer-friendly publishing tool for building professional-quality **PDF** and **EPUB** books from Markdown.
 
-It is built on top of **Pandoc**, but adds an opinionated project structure, automatic book assembly, EPUB/PDF templates, and utilities for converting existing DOCX manuscripts into Markdown projects.
+It is built on top of [**Pandoc**](https://pandoc.org/), but adds an opinionated project structure, automatic book assembly, EPUB/PDF templates, and utilities for converting existing DOCX manuscripts into Markdown projects.
 
 ## Why PubDown?
 
@@ -19,8 +19,7 @@ With PubDown you can:
 - write each chapter as a separate Markdown file
 - organize books into parts
 - manage front matter and back matter
-- generate professional PDF and EPUB editions from the same source
-- customize templates, CSS and LaTeX
+- generate professional PDF and EPUB editions from the same source (ready for **Amazon KDP**, **Google Play Books**, **Apple Books**, **Lulu**, etc.)
 - import existing DOCX manuscripts
 - keep everything under version control with Git
 
@@ -41,9 +40,7 @@ If you don't, PubDown gives you a much easier starting point than learning raw P
 - 📑 Front matter / main matter / back matter support
 - 📥 Import Word (.docx) books into Markdown
 
----
-
-# Installation
+## Installation
 
 Requirements:
 
@@ -61,9 +58,7 @@ cd pubdown
 yarn install
 ```
 
----
-
-# Project structure
+## Project structure
 
 A book project looks like this:
 
@@ -84,13 +79,25 @@ my-book/
 └── dedication.md
 ```
 
----
+## book.yaml
 
-# book.yaml
+The `book.yaml` file defines the logical structure and organization of the book's content. It maps the markdown source files into specific sections like frontmatter, main parts with chapters, and backmatter.
 
-`book.yaml` defines the logical structure of the book.
+### Structure Fields
 
-Example:
+*   **`frontmatter`** *(List of Objects, Optional)*: Defines the introductory files of the book (e.g., Foreword, Preface, Introduction). Each item requires a `file` path.
+*   **`parts`** *(List of Objects, Required)*: The main body of the book, broken down into structural parts. 
+    *   **`title`** *(String)*: The name of the part.
+    *   **`items`** *(List of Objects)*: The collection of chapters belonging to this part. Each item requires a `file` path.
+*   **`backmatter`** *(List of Objects, Optional)*: Defines the concluding sections of the book (e.g., Acknowledgements, Appendix, Afterword). Each item requires a `file` path.
+
+### Item Properties
+
+*   **`file`** *(String, Required)*: The relative or absolute path to the Markdown (`.md`) file containing the content for that specific chapter.
+
+> **Note on Content Structure:** Each Markdown file linked in the YAML must start with a top-level (`# `) heading, which the build script uses to extract the title of that section or chapter.
+
+### Example
 
 ```yaml
 frontmatter:
@@ -110,28 +117,50 @@ backmatter:
   - file: acknowledgements.md
 ```
 
----
+## meta.yaml
 
-# meta.yaml
+The `meta.yaml` file defines the metadata of the book used during the build process to generate document headers, title pages, copyright notices, and formatting options for both EPUB and PDF outputs.
 
-Example:
+### Global Metadata Fields
+
+*   **`title`** *(String, Required)*: The main title of the book.
+*   **`subtitle`** *(String, Optional)*: The subtitle of the book, which appears on the title page.
+*   **`author`** *(String, Required)*: The name of the author(s).
+*   **`language`** *(String, Optional)*: The primary language of the document (e.g., `en`), passed to Pandoc.
+*   **`latex-language`** *(String, Optional)*: The language parameter specifically used by the LaTeX engine for hyphenation and typesetting rules (e.g., `english`).
+*   **`rights`** *(String, Optional)*: A short copyright notice line (e.g., `© 2026 László Fazekas`).
+*   **`publisher`** *(String, Optional)*: The name of the publisher.
+*   **`toc-title`** *(String, Optional)*: The custom title for the Table of Contents page (e.g., `Table of Contents`).
+
+### Layout & Page Content Fields
+
+*   **`copyright-page`** *(Block Scalar / Multi-line Text, Optional)*: The complete legal notice and licensing information text.
+*   **`dedication`** *(Block Scalar / Multi-line Text, Optional)*: The dedication text used primarily by the PDF/print layout engine. *Note: If a `dedication.md` file is present in the book directory, its content will automatically populate this field at runtime.*
+*   **`dedication-ebook`** *(Block Scalar / Multi-line Text, Optional)*: An EPUB-exclusive multi-line section placed immediately after the copyright page. This is ideal for tailored notes, calls-to-action, or links meant specifically for digital readers.
+
+### Example
 
 ```yaml
-title: Simulated Reality
-subtitle: An Exciting Journey
-author: John Doe
-
+title: "Simulated Reality"
+subtitle: "An Exciting Journey into the World of Quantum Mechanics, Brain-Machine Interfaces, and Transhumanism"
+toc-title: "Table of Contents"
+author: "László Fazekas"
 language: en
 latex-language: english
+rights: "© 2026 László Fazekas"
+copyright-page: |
+  Copyright © 2026 by László Fazekas
 
-publisher: Example Publisher
-rights: © 2026 John Doe
-toc-title: Contents
+  All rights reserved. No part of this publication may be reproduced...
+dedication: |
+  I am grateful to my family...
+dedication-ebook: |
+  Dear Reader,
+
+  Simulated Reality is my first book. Thank you for downloading this eBook...
 ```
 
----
-
-# Building a book
+## Building a book
 
 Build both formats:
 
@@ -162,9 +191,7 @@ dist/
     simulated-reality.epub
 ```
 
----
-
-# Importing an existing DOCX
+## Importing an existing DOCX
 
 PubDown can split an existing Word manuscript into a complete Markdown project.
 
@@ -182,9 +209,7 @@ The importer:
 - preserves document hierarchy
 - rewrites image links automatically
 
----
-
-# Markdown
+## Markdown
 
 Each chapter starts with a single H1 heading.
 
@@ -204,7 +229,7 @@ The H1 is used as the chapter title and is removed automatically from the body w
 
 ---
 
-# PDF generation
+## PDF generation
 
 PDF output uses:
 
@@ -216,9 +241,7 @@ PDF output uses:
 - drop caps
 - typography improvements
 
----
-
-# EPUB generation
+## EPUB generation
 
 EPUB output includes:
 
@@ -230,24 +253,20 @@ EPUB output includes:
 - automatic table of contents
 - chapter splitting
 
----
-
-# Utilities
+## Utilities
 
 PubDown also provides:
 
 - DOCX → Markdown converter
 - image extraction
 - image path rewriting
-- automatic metadata generation
+- automatic `book.yaml` generation
 
----
-
-# License
+## License
 
 MIT
 
-# Sample Content
+## Sample Content
 
 The `sample/` directory contains excerpts from my book **Simulated Reality**.
 
